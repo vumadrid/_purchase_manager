@@ -21,7 +21,7 @@ class Department(models.Model):
 
     def _compute_department_count(self):
         for rec in self:
-            department_count = self.env['purchase_request'].search_count([('department_id', '=', rec.id)])
+            department_count = self.env['purchase.request'].search_count([('department_id', '=', rec.id)])
             rec.department_count = department_count
 
     def _compute_all_purchase(self):
@@ -45,19 +45,19 @@ class PurchaseRequestLine(models.Model):
     def _compute_total(self):
         for line in self:
             line.total = line.qty_approve * line.price_unit
-    #
-    #@api.onchange('qty_approve')
-    # def _onchange_qty_approve(self):
-    #     if self.state == 'wait':
-    #         return
-    #     else:
-    #         self.qty_approve = self._origin.qty_approve
 
-    # @api.constrains('qty_approve')
-    # def _check_qty_approve(self):
-    #     for line in self:
-    #         if line.state == 'wait' and line.qty_approve < 0:
-    #             raise exceptions.ValidationError("Approved quantity cannot be negative when the request is in 'wait' state.")
+    @api.onchange('qty_approve')
+    def _onchange_qty_approve(self):
+        if self.state == 'wait':
+            return
+        else:
+            self.qty_approve = self._origin.qty_approve
+
+    @api.constrains('qty_approve')
+    def _check_qty_approve(self):
+        for line in self:
+            if line.state == 'wait' and line.qty_approve < 0:
+                raise exceptions.ValidationError("Approved quantity cannot be negative when the request is in 'wait' state.")
 
 
 class PurchaseRequest(models.Model):
@@ -99,7 +99,7 @@ class PurchaseRequest(models.Model):
             request.total_qty = sum(request.request_line_ids.mapped('qty_approve'))
             request.total_amount = sum(request.request_line_ids.mapped('total'))
 
-    @api.ondelete(at_uninstall=False)
+
     def unlink(self):
         for request in self:
             if request.state != 'draft':
@@ -115,23 +115,20 @@ class PurchaseRequest(models.Model):
         return True
 
 
-    @api.model
     def action_set_draft(self):
         self.write({'state': 'draft'})
         return {}
 
 
-    @api.model
     def action_set_done(self):
         for order in self:
             if order.state == 'approved':
                 order.write({'state': 'cancel'})
         return True
 
-    @api.model
-    def write(self, vals):
-        if any(state == 'cancel' for state in set(self.mapped('state'))):
-            raise UserError(_("No edit in done state"))
-        else:
-            return super().write(vals)
+    # def write(self, vals):
+    #     if any(state == 'cancel' for state in set(self.mapped('state'))):
+    #         raise UserError(_("No edit in done state"))
+    #     else:
+    #         return super().write(vals)
 
