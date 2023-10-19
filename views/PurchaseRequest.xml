@@ -1,0 +1,95 @@
+<odoo>
+    <record id="action_purchase_request_list" model="ir.actions.act_window">
+        <field name="name">Purchase Request</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="create_first_id">
+                Create your first ID
+            </p>
+        </field>
+    </record>
+
+        <!-- Form View-->
+    <record id="view_id_form" model="ir.ui.view">
+        <field name="name">purchase.request.form</field>
+        <field name="model">purchase.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button string="RequestApproval" states="wait" context="{'validate_analytic': True}" type="object" class="oe_highlight" name="request_approval"/>
+                    <button string="RequestApproval" states="draft" context="{'validate_analytic': True}" type="object" class="oe_highlight" name="request_approval"/>
+                    <button string="Cancel" type="object" context="{'validate_analytic': True}" states="draft,wait,approved,cancel" class="oe_highlight" name="action_set_done"/>
+                    <button string="set to draft" states="cancel" context="{'validate_analytic': True}"  type="object" class="oe_highlight" name="action_set_draft" />
+                    <field name="state" widget="statusbar" statusbar_visible="wait,approved,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="department_id" attrs="{'readonly': [('state', '=', 'cancel')]}"/>
+                            <field name="request_id"  attrs="{'readonly': [('state', '=', 'cancel')]}"/>
+                            <field name="approver_id" attrs="{'readonly': [('state', '=', 'cancel')]}"/>
+<!--                            <field name="state"/>-->
+                        </group>
+                        <group>
+                            <field name="date" attrs="{'readonly': [('state', '=', 'cancel')]}"/>
+                            <field name="date_approve" attrs="{'readonly': [('state', '=', 'cancel')]}"/>
+                            <field name="description" attrs="{'readonly': [('state', '=', 'cancel')]}" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="Products">
+                            <fields>
+                                <tree string="Purchase Order Lines" editable="bottom">
+                                    <field name="request_line_ids" attrs="{'readonly': [('state', '=', 'cancel')]}"/>
+                                </tree>
+                            </fields>
+                        </page>
+                    </notebook>
+                    <group class="oe_subtotal_footer oe_right">
+                        <div class="oe_subtotal_footer_separator oe_inline">
+                            <label for="total_amount"/>
+                        </div>
+                        <field name="total_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                    </group>
+                </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="message_ids"/>
+                        <field name="activity_ids"/>
+                    </div>
+            </form>
+        </field>
+    </record>
+        <!-- tree view-->
+    <record id="view_id_tree" model="ir.ui.view">
+        <field name="name">purchase.request.tree</field>
+        <field name="model">purchase.request</field>
+        <field name="arch" type="xml">
+            <tree><!-- tree view -->
+                <field name="name"/>
+                <field name="department_id" />
+                <field name="request_id"/>
+                <field name="approver_id"/>
+                <field name="date"/>
+                <field name="date_approve"/>
+                <field name="request_line_ids"/>
+                <field name="description" />
+                <field name="state"/>
+                <field name="total_qty"/>
+                <field name="total_amount"/>
+            </tree>
+        </field>
+    </record>
+
+    <menuitem id="menu_purchase_request_list" name="Purchase Requests" sequence="10"/>
+    <menuitem id="menu_purchase_request" name="Purchase_Requests_List" sequence="10" parent='menu_purchase_request_list'
+                  action="action_purchase_request_list" />
+</odoo>
