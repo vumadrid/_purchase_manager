@@ -7,7 +7,6 @@ class Department(models.Model):
     _name = 'hr.department'
     _rec_name = 'department'
 
-    # department_code = fields.Char(string='Department', required=True, unique=True)
     department = fields.Char(string='Department', required=True, unique=True)
     department_members = fields.One2many(comodel_name='purchase.request', inverse_name='department_id',
                                          string='Department Members')
@@ -33,8 +32,8 @@ class PurchaseRequestLine(models.Model):
     _name = 'purchase.request.line'
     _description = 'Purchase Request Line'
 
-    request_id = fields.Many2one('purchase.request', string="Purchase Request", ondelete='cascade')
-    product_id = fields.Many2one('product.template', string="Product", required=True)
+    request_id = fields.Many2one('purchase.request', string="Purchase Request", readonly=True, ondelete='cascade')
+    product_id = fields.Many2one('product.template', string="Product", readonly=True, required=True)
     uom_id = fields.Many2one('uom.uom', string="Unit of Measure", required=True)
     qty = fields.Float(string="Quantity", default=1.0)
     qty_approve = fields.Float(string="Approved Quantity", readonly=False)
@@ -46,18 +45,18 @@ class PurchaseRequestLine(models.Model):
         for line in self:
             line.total = line.qty_approve * line.price_unit
 
-    @api.onchange('qty_approve')
-    def _onchange_qty_approve(self):
-        if self.state == 'wait':
-            return
-        else:
-            self.qty_approve = self._origin.qty_approve
-
-    @api.constrains('qty_approve')
-    def _check_qty_approve(self):
-        for line in self:
-            if line.state == 'wait' and line.qty_approve < 0:
-                raise exceptions.ValidationError("Approved quantity cannot be negative when the request is in 'wait' state.")
+    # @api.onchange('qty_approve')
+    # def _onchange_qty_approve(self):
+    #     if self.state == 'wait':
+    #         return
+    #     else:
+    #         self.qty_approve = self._origin.qty_approve
+    #
+    # @api.constrains('qty_approve')
+    # def _check_qty_approve(self):
+    #     for line in self:
+    #         if line.state == 'wait' and line.qty_approve < 0:
+    #             raise exceptions.ValidationError("Approved quantity cannot be negative when the request is in 'wait' state.")
 
 
 class PurchaseRequest(models.Model):
@@ -65,9 +64,9 @@ class PurchaseRequest(models.Model):
     _description = 'Purchase Request'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string="Name", required=True, copy=False, readonly=True, index=True, tracking=True, default=lambda self: _('PR'))
-    department_id = fields.Many2one(comodel_name='hr.department', ondelete='set null', string="Department")
-    request_id = fields.Many2one('res.users', string="Requested By", default=lambda self: self.env.user)
+    name = fields.Char(string="Name", required=True, copy=False, readonly="1", index=True, tracking=True, default=lambda self: _('PR'))
+    department_id = fields.Many2one(comodel_name='hr.department', ondelete='set null', string="Department", readonly=True)
+    request_id = fields.Many2one('res.users', string="Requested By", readonly=True, default=lambda self: self.env.user)
     approver_id = fields.Many2one('res.users', string="Approver")
     date = fields.Date(string="Date", default=fields.Date.context_today)
     date_approve = fields.Date(string="Date Approved")
@@ -83,22 +82,31 @@ class PurchaseRequest(models.Model):
     ], string="State", default='draft', readonly=True, copy=False, Tracking=True, track_visibility='onchange')
     total_qty = fields.Float(string="Total Quantity", compute='_compute_total')
     total_amount = fields.Float(string="Total", compute='_compute_total')
-
     @api.model
     def create(self, values):
+        values['name'] = self.env['ir.sequence'].next_by_code('purchase.request')
+        return super(PurchaseRequest, self).create(values)
 
-        if values.get('name', _('PR')) == _('PR'):
-            values['name'] = self.env['ir.sequence'].next_by_code('purchase.request') or _('PR')
+    @api.model
+    def create(self, vals):
+        vals['request_id'] = self.env.user.id
 
-        res = super(PurchaseRequest, self).create(values)
+        if 'department_id' in vals:
+            department =self.env['hr.department'].browse(vals['department_id'])
+            if department.approver_id:
+                vals['approve_id'] = department.approver_id.id
+                return super(PurchaseRequest, self).create(vals)
 
-        return res
+    @api.model
+    def create(self, der):
+        der['department_id'] = self.env.user.department_id.id
+        return super(PurchaseRequest, self).create(der)
+
     @api.depends('request_line_ids.qty_approve', 'request_line_ids.total')
     def _compute_total(self):
         for request in self:
             request.total_qty = sum(request.request_line_ids.mapped('qty_approve'))
             request.total_amount = sum(request.request_line_ids.mapped('total'))
-
 
     def unlink(self):
         for request in self:
@@ -114,11 +122,9 @@ class PurchaseRequest(models.Model):
             order.write({'state': 'approved'})
         return True
 
-
     def action_set_draft(self):
         self.write({'state': 'draft'})
         return {}
-
 
     def action_set_done(self):
         for order in self:
@@ -126,9 +132,11 @@ class PurchaseRequest(models.Model):
                 order.write({'state': 'cancel'})
         return True
 
-    # def write(self, vals):
-    #     if any(state == 'cancel' for state in set(self.mapped('state'))):
-    #         raise UserError(_("No edit in done state"))
-    #     else:
-    #         return super().write(vals)
+    @api.constrains('request_line_ids', 'state')
+    def _check_request_line_editability(self):
+        for request in self:
+            if request.state != 'draft':
+                if request.request_line_ids:
+                    raise exceptions.ValidationError("Cannot add or remove request lines when the state is not 'draft'.")
+
 

@@ -19,13 +19,13 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mail'],
+    'depends': ['base', 'mail'],
 
     # always loaded
     'data': [
-        'data/data.xml',
-        'views/PurchaseRequest.xml',
-        'views/PurchaseRequestLine.xml',
+        'data/purchase_request_data.xml',
+        'views/purchase_request.xml',
+        'views/purchase_request_line.xml',
         'views/purchase_department.xml',
     ],
     # only loaded in demonstration mode
