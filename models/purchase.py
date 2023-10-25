@@ -1,62 +1,12 @@
 from random import random
 from odoo import fields, models, api, exceptions, _
 from odoo.exceptions import ValidationError, UserError
+import csv
+import io
+import base64
+import pandas as pd
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, date
-class Department(models.Model):
-    _name = 'hr.department'
-    _rec_name = 'department'
-
-    department = fields.Char(string='Department', required=True, unique=True)
-    department_members = fields.One2many(comodel_name='purchase.request', inverse_name='department_id',
-                                         string='Department Members')
-    _sql_constraints = [
-        ('department_unique',
-         'unique(department)',
-         'Choose another value - it has to be unique!')
-    ]
-    department_count = fields.Integer(string='Department count', compute='_compute_department_count')
-    all_purchase = fields.Integer(string='All purchase count', compute='_compute_all_purchase')
-
-    def _compute_department_count(self):
-        for rec in self:
-            department_count = self.env['purchase.request'].search_count([('department_id', '=', rec.id)])
-            rec.department_count = department_count
-
-    def _compute_all_purchase(self):
-        all_purchase = self.env['purchase.request'].search_count([])
-        self.all_purchase = all_purchase
-
-
-class PurchaseRequestLine(models.Model):
-    _name = 'purchase.request.line'
-    _description = 'Purchase Request Line'
-
-    request_id = fields.Many2one('purchase.request', string="Purchase Request", readonly=True, ondelete='cascade')
-    product_id = fields.Many2one('product.template', string="Product", readonly=True, required=True)
-    uom_id = fields.Many2one('uom.uom', string="Unit of Measure", required=True)
-    qty = fields.Float(string="Quantity", default=1.0)
-    qty_approve = fields.Float(string="Approved Quantity", readonly=False)
-    price_unit = fields.Float(string="Unit Price")
-    total = fields.Float(string="Total", compute='_compute_total', store=True)
-
-    @api.depends('qty_approve', 'price_unit')
-    def _compute_total(self):
-        for line in self:
-            line.total = line.qty_approve * line.price_unit
-
-    # @api.onchange('qty_approve')
-    # def _onchange_qty_approve(self):
-    #     if self.state == 'wait':
-    #         return
-    #     else:
-    #         self.qty_approve = self._origin.qty_approve
-    #
-    # @api.constrains('qty_approve')
-    # def _check_qty_approve(self):
-    #     for line in self:
-    #         if line.state == 'wait' and line.qty_approve < 0:
-    #             raise exceptions.ValidationError("Approved quantity cannot be negative when the request is in 'wait' state.")
 
 
 class PurchaseRequest(models.Model):
@@ -82,10 +32,6 @@ class PurchaseRequest(models.Model):
     ], string="State", default='draft', readonly=True, copy=False, Tracking=True, track_visibility='onchange')
     total_qty = fields.Float(string="Total Quantity", compute='_compute_total')
     total_amount = fields.Float(string="Total", compute='_compute_total')
-    @api.model
-    def create(self, values):
-        values['name'] = self.env['ir.sequence'].next_by_code('purchase.request')
-        return super(PurchaseRequest, self).create(values)
 
     @api.model
     def create(self, vals):
@@ -101,6 +47,11 @@ class PurchaseRequest(models.Model):
     def create(self, der):
         der['department_id'] = self.env.user.department_id.id
         return super(PurchaseRequest, self).create(der)
+
+    @api.model
+    def create(self, values):
+        values['name'] = self.env['ir.sequence'].next_by_code('purchase.request')
+        return super(PurchaseRequest, self).create(values)
 
     @api.depends('request_line_ids.qty_approve', 'request_line_ids.total')
     def _compute_total(self):
@@ -132,11 +83,34 @@ class PurchaseRequest(models.Model):
                 order.write({'state': 'cancel'})
         return True
 
-    @api.constrains('request_line_ids', 'state')
-    def _check_request_line_editability(self):
-        for request in self:
-            if request.state != 'draft':
-                if request.request_line_ids:
-                    raise exceptions.ValidationError("Cannot add or remove request lines when the state is not 'draft'.")
+    # @api.constrains('request_line_ids', 'state')
+    # def _check_request_line_editability(self):
+    #     for request in self:
+    #         if request.state != 'draft':
+    #             if request.request_line_ids:
+    #                 raise exceptions.ValidationError("Cannot add or remove request lines when the state is not 'draft'.")
 
+    def export_to_excel(self):
+        for line in self:
+            output = io.StringIO()
+            csv_writer = csv.writer(output)
+            csv_writer.writerow(['Product', 'Quantity', 'Uom'])
 
+            for line in self.request_line_ids:
+                csv_writer.writerow([line.product_id.name, line.qty, line.uom_id.name])
+
+            attachment = self.env['ir.attachment'].create({
+                'name': 'purchase_request_export.xlsx',
+                'datas': base64.b64encode(output.getvalue().encode()),
+                'res_model': self._name,
+                'res_id': self.id,
+            })
+
+            output.close()
+
+            return {
+                'name': 'Xuất Excel',
+                'type': 'ir.actions.act_url',
+                'url': "/web/content/%s?download=true" % attachment.id,
+                'target': 'self',
+            }

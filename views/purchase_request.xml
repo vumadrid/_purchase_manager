@@ -22,8 +22,8 @@
                     <button string="RequestApproval" states="draft" context="{'validate_analytic': True}" type="object" class="oe_highlight" name="request_approval"/>
                     <button string="Cancel" type="object" context="{'validate_analytic': True}" states="draft,wait,approved,cancel" class="oe_highlight" name="action_set_done"/>
                     <button string="set to draft" states="cancel" context="{'validate_analytic': True}"  type="object" class="oe_highlight" name="action_set_draft" />
-<!--                    <button name="export_to_excel" string="Xuất Excel" type="object" states="approved" class="oe_highlight"/>-->
-                    <field name="state" widget="statusbar" statusbar_visible="wait,approved,cancel"/>
+                    <button name="export_to_excel" string="Xuất Excel" type="object" states="approved" context="{'validate_analytic': True}" class="oe_highlight"/>
+                    <field name="state" widget="statusbar" statusbar_visible="wait,approved,cancel" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -35,7 +35,8 @@
                         <group>
                             <field name="department_id" options="{'no_create': True}" widget="selection" attrs="{'readonly': [('state', '=', 'cancel')]}"/>
                             <field name="request_id" options="{'no_create': True}" widget="selection" attrs="{'readonly': [('state', '=', 'cancel')]}"/>
-                            <field name="approver_id" options="{'no_create': True}" widget="selection" attrs="{'readonly': [('state', '=', 'cancel')], 'invisible': [('department_id', '=', False)]}" domain="[('department_id', '=', department_id)]"/>
+                            <field name="approver_id" options="{'no_create': True}" widget="selection" attrs="{'readonly': [('state', '=', 'cancel')], 'invisible': [('department_id', '=', False)]}" />
+<!--                            domain="[('department_id', '=', department_id)]"-->
 <!--                            <field name="state"/>-->
                         </group>
                         <group>
@@ -90,7 +91,7 @@
         </field>
     </record>
 
-    <menuitem id="menu_purchase_request_list" name="Purchase Requests" sequence="10"/>
+    <menuitem id="menu_purchase_request_list" name="Purchase Requests" sequence="10" groups=""/>
     <menuitem id="menu_purchase_request" name="Purchase_Requests_List" sequence="10" parent='menu_purchase_request_list'
                   action="action_purchase_request_list" />
 </odoo>

@@ -1,0 +1,104 @@
+
+<!--<odoo>-->
+
+<!--    <template id="report_purchase_detail">-->
+<!--        <t t-call="web.html_container">-->
+<!--            <t t-foreach="docs" t-as="o">-->
+<!--                <t t-call="web.external_layout">-->
+<!--                    <div class="page">-->
+<!--                        <div class="oe_structure"/>-->
+<!--                        <div class="row">-->
+<!--                            <div class="col-xs-8">-->
+<!--                                <table class="table table-condensed" style="border: 3px solid black !important;">-->
+<!--                                    <tr>-->
+<!--                                        <td width="100%">-->
+<!--                                            <table>-->
+<!--                                                <tr>-->
+<!--                                                    <td colspan="3" class="text-center">-->
+<!--                                                        <span t-field="o.name"/>-->
+<!--                                                    </td>-->
+<!--                                                </tr>-->
+<!--                                                <tr>-->
+<!--                                                    <td>-->
+<!--                                                        <span>-->
+<!--                                                            <strong>Date:</strong>-->
+<!--                                                        </span>-->
+<!--                                                    </td>-->
+<!--                                                    <td>-->
+<!--                                                        <span>:</span>-->
+<!--                                                    </td>-->
+<!--                                                    <td>-->
+<!--                                                        <span t-field="o.date"/>-->
+<!--                                                    </td>-->
+<!--                                                </tr>-->
+<!--                                                <tr>-->
+<!--                                                    <td>-->
+<!--                                                        <span>-->
+<!--                                                            <strong>Description:</strong>-->
+<!--                                                        </span>-->
+<!--                                                    </td>-->
+<!--                                                    <td>-->
+<!--                                                        <span>:</span>-->
+<!--                                                    </td>-->
+<!--                                                    <td>-->
+<!--                                                        <span t-field="o.description"/>-->
+<!--                                                    </td>-->
+<!--                                                </tr>-->
+<!--                                            </table>-->
+<!--                                        </td>-->
+<!--                                    </tr>-->
+<!--                                </table>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <br/>-->
+
+<!--                        <t t-if="o.request_line_ids">-->
+<!--                            <span>Purchase Request Line Details</span>-->
+<!--                            <table class="table table-sm o_main_table" name="purchase_request_line">-->
+<!--                                <thead>-->
+<!--                                    <tr>-->
+<!--                                        <th name="th_product_id" class="text-start">-->
+<!--                                            <span>Product</span>-->
+<!--                                        </th>-->
+<!--                                        <th name="th_price_unit" class="text-start">-->
+<!--                                            <span>Unit Price</span>-->
+<!--                                        </th>-->
+<!--                                        <th name="th_qty_approve" class="text-start">-->
+<!--                                            <span>Approved Quantity</span>-->
+<!--                                        </th>-->
+<!--                                    </tr>-->
+<!--                                </thead>-->
+<!--                                <t t-set="department_count" t-value="0"/>-->
+<!--                                <t t-foreach="o.department_id" t-as="line">-->
+<!--                                    <t t-set="department_count" t-value="department_count + 1"/>-->
+<!--                                    <tr>-->
+<!--                                        <td>-->
+<!--                                            <span t-field="line.department"/>-->
+<!--                                        </td>-->
+<!--                                        <td>-->
+<!--                                            <span t-field="line.department_member"/>-->
+<!--                                        </td>-->
+<!--&lt;!&ndash;                                        <td>&ndash;&gt;-->
+<!--&lt;!&ndash;                                            <span t-field="line.doctor_id.doctor_name"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                        </td>&ndash;&gt;-->
+<!--                                    </tr>-->
+<!--                                </t>-->
+
+<!--                                <tr>-->
+<!--                                    <td colspan="2">-->
+<!--                                        <strong>Total</strong>-->
+<!--                                    </td>-->
+<!--                                    <td>-->
+<!--                                        <t t-esc="total_amount"/>-->
+<!--                                    </td>-->
+<!--                                </tr>-->
+<!--                            </table>-->
+<!--                        </t>-->
+
+<!--                    </div>-->
+<!--                </t>-->
+<!--            </t>-->
+<!--        </t>-->
+<!--    </template>-->
+
+<!--</odoo>-->

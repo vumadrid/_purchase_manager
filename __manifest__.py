@@ -27,6 +27,9 @@
         'views/purchase_request.xml',
         'views/purchase_request_line.xml',
         'views/purchase_department.xml',
+        # 'report/purchase_details_template.xml',
+        # 'report/purchase_card.xml',
+        # 'report/report.xml',
     ],
     # only loaded in demonstration mode
     'demo': [],

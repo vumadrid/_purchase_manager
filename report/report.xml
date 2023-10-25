@@ -1,0 +1,34 @@
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<odoo>-->
+
+<!--    <record id="report_purchase_request_details" model="ir.actions.report">-->
+<!--        <field name="name">Purchase Details</field>-->
+<!--        <field name="model">purchase.request</field>-->
+<!--        <field name="report_type">qweb-pdf</field>-->
+<!--        <field name="report_name">purchase_manager.report_purchase_detail</field>-->
+<!--        <field name="report_file">purchase_manager.report_purchase_detail</field>-->
+<!--        <field name="binding_model_id" ref="base.model_purchase_request"/>-->
+<!--        <field name="binding_type">report</field>-->
+<!--    </record>-->
+
+<!--    <record id="report_purchase_request_cards" model="ir.actions.report">-->
+<!--        <field name="name">Purchase Card</field>-->
+<!--        <field name="model">purchase.request</field>-->
+<!--        <field name="report_type">qweb-pdf</field>-->
+<!--        <field name="report_name">purchase_manager.report_purchase_card</field>-->
+<!--        <field name="report_file">purchase_manager.report_purchase_card</field>-->
+<!--        <field name="binding_model_id" ref="base.model_purchase_request"/>-->
+<!--        <field name="binding_type">report</field>-->
+<!--    </record>-->
+
+<!--&lt;!&ndash;    <record id="report_patient_card_xls" model="ir.actions.report">&ndash;&gt;-->
+<!--&lt;!&ndash;        <field name="name">Patient Card Excel</field>&ndash;&gt;-->
+<!--&lt;!&ndash;        <field name="model">hospital.patient</field>&ndash;&gt;-->
+<!--&lt;!&ndash;        <field name="report_type">xlsx</field>&ndash;&gt;-->
+<!--&lt;!&ndash;        <field name="report_name">om_hospital.report_patient_id_card_xls</field>&ndash;&gt;-->
+<!--&lt;!&ndash;        <field name="report_file">om_hospital.report_patient_id_card_xls</field>&ndash;&gt;-->
+<!--&lt;!&ndash;        <field name="binding_model_id" ref="model_hospital_patient"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <field name="binding_type">report</field>&ndash;&gt;-->
+<!--&lt;!&ndash;    </record>&ndash;&gt;-->
+
+<!--</odoo>-->

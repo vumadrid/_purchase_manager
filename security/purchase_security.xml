@@ -23,17 +23,7 @@
             <field name="name">Manager Own Request</field>
             <field name="model_id" ref="model_purchase" />
             <field name="groups" eval="[(6,0, ref('purchase_manager.group_purchase_manager'))]"/>
-            <field name="domain_force">[('request_id', 'in', [user.id]+user.employee_ids.ids)]</field>
+            <field name="domain_force">['|', ('request_id', '=', current_user_id), ('request_id', 'in', employee_ids)]</field>
         </record>
-<!--        <record id="people_comp_rule"  model="ir.rule">-->
-<!--            <field name="name">People</field>-->
-<!--            <field name="model_id" ref="model_people" />-->
-<!--            <field name="groups" eval="[(4, ref('my-company.group_people_manager'))]"/>-->
-<!--            <field name="domain_force">[('height', '!=', 2)]</field>-->
-<!--            <field name="perm_read" eval="false" />-->
-<!--            <field name="perm_write" eval="false" />-->
-<!--            <field name="perm_create" eval="false" />-->
-<!--            <field name="perm_unlink" eval="true" />-->
-<!--        </record>-->
     </data>
 </odoo>
